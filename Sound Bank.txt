@@ -1,0 +1,54 @@
+# ============================================================
+#  Sound Bank  —  notecard config for sound_bank.lsl
+# ------------------------------------------------------------
+#  This notecard maps EVENT / STATE KEYS to sounds. Edit it, save it,
+#  and the sound_bank script reloads automatically — no recompile.
+#
+#  FORMAT (one sound per line):
+#      key | sound_uuid | volume | mode
+#
+#      key         a name YOU choose for an event or cell state, e.g.
+#                  birth, death_lonely, reproduce, flourish, step.
+#      sound_uuid  the asset UUID of a sound. In-world: right-click a
+#                  FULL-PERM sound in inventory -> Copy Asset UUID.
+#      volume      0.0 .. 1.0   (optional, default 1.0)
+#      mode        trigger | play | loop   (optional, default trigger)
+#                    trigger = fire-and-forget, detached from the prim.
+#                              Keeps playing even if the object dies/moves.
+#                              Best for one-shots: death, reproduce, step.
+#                    play    = attached to the prim (spatial). A new play
+#                              replaces the prim's current attached sound.
+#                    loop    = ambient loop; runs until @stop or another
+#                              loop. Best for a "flourishing" hum.
+#
+#  RANDOM POOLS: put the SAME key on several lines and the bank picks one
+#  at random each time — instant variety. Great for births/steps.
+#
+#  Lines starting with # are comments. Blank lines are ignored.
+#
+#  SL SOUND LIMITS: uploads are mono, <= 10 seconds, resampled to 44.1kHz.
+#  Longer/continuous audio -> use looping short clips or parcel media.
+# ============================================================
+
+# ---- Replace the 00000000-... placeholders with your real UUIDs. -------
+# ---- Delete or comment out any keys you're not using yet.       -------
+
+# ---------- Life-sphere events ----------
+birth          | 00000000-0000-0000-0000-000000000000 | 0.8 | trigger
+death_lonely   | 00000000-0000-0000-0000-000000000000 | 0.7 | trigger
+death_crowded  | 00000000-0000-0000-0000-000000000000 | 0.7 | trigger
+reproduce      | 00000000-0000-0000-0000-000000000000 | 1.0 | trigger
+
+# A sustained tone while a sphere is healthy/flourishing. Start it when the
+# sphere enters that state; send "@stop" when it leaves.
+flourish       | 00000000-0000-0000-0000-000000000000 | 0.3 | loop
+
+# ---------- GoL board events ----------
+# One "tick" per generation. Add extra 'step' lines for a random pool.
+step           | 00000000-0000-0000-0000-000000000000 | 0.5 | trigger
+# step         | 00000000-0000-0000-0000-000000000000 | 0.5 | trigger
+# step         | 00000000-0000-0000-0000-000000000000 | 0.5 | trigger
+
+# Optional: sounds tied to aggregate board state rather than events.
+# stable       | 00000000-0000-0000-0000-000000000000 | 0.4 | trigger
+# extinct      | 00000000-0000-0000-0000-000000000000 | 0.6 | trigger
