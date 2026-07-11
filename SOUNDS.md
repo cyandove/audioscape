@@ -109,6 +109,43 @@ relay script in every tile — usually not worth the script-count/64 KB cost for
 225 prims. Prefer object-center `trigger` sounds, or a handful of `play` sounds
 from the root.
 
+## Scales & sonification
+
+Named event pools (`birth`, `death_*`) are picked **at random**. An *ordered*
+pool — a musical scale — is played **by index** instead, so you can map a
+spatial or numeric dimension of the sim straight to pitch. Repeat a pool name
+on consecutive notecard lines and the bank keeps them in file order:
+
+```
+scale | <C4 uuid> | 0.6 | trigger      # index 0
+scale | <D4 uuid> | 0.6 | trigger      # index 1
+...
+penta | <C4 uuid> | 0.6 | trigger       # a 6-note major-pentatonic subset
+```
+
+Play by index (wraps modulo the pool length, so any column/count is valid):
+
+```lsl
+// GoL: each born cell rings its column's note — a glider becomes an arpeggio.
+llMessageLinked(LINK_THIS, LM_SOUND, "@idx|penta|" + (string)col, NULL_KEY);
+
+// Sphere: map neighbour count (0..8) or a health band to pitch.
+llMessageLinked(LINK_THIS, LM_SOUND, "@idx|scale|" + (string)neighbours, NULL_KEY);
+
+// A chord (comma-separated indices) — e.g. C-E-G-C on reproduce.
+llMessageLinked(LINK_THIS, LM_SOUND, "@chord|scale|0,2,4,7", NULL_KEY);
+```
+
+**Use pentatonic (`penta`) as the default** for anything where many notes may
+sound at once (a busy generation, a cluster of spheres): every combination is
+consonant, so patterns always sound musical. Reserve the full `scale` for
+deliberate melodies or chords. Swapping instruments or scales is a notecard
+edit — the `@idx` calls don't change.
+
+Keep per-generation note counts modest: one note per active column (≤ board
+width) is a shimmer; one per live cell on a full board is mud (and risks the
+~64-deep link-message queue — send a batched message if you go wide).
+
 ## LSL sound gotchas baked in
 
 - **Preloading**: after loading (and on every reset, straight from LSD) the

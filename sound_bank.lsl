@@ -95,18 +95,22 @@ loadNotecard() {
     gQuery = llGetNotecardLine(NOTECARD, gLine);
 }
 
-// -- play the sound(s) registered under a key ----------------------------
+// -- play one record from a pool -----------------------------------------
+// idx < 0  -> random pick (event pools).
+// idx >= 0 -> that index, wrapped modulo pool length (scale/ordered pools),
+//             so a column/neighbor count larger than the scale just wraps.
 // volOverride < 0 means "use the stored volume".
-playKey(string k, float volOverride) {
-    if (k == "@stop")   { llStopSound();  return; }
-    if (k == "@reload") { loadNotecard(); return; }
-
-    string pool = llLinksetDataRead(PREFIX + k);
-    if (pool == "") return; // no mapping for this key — stay quiet
+playRecord(string poolKey, integer idx, float volOverride) {
+    string pool = llLinksetDataRead(PREFIX + poolKey);
+    if (pool == "") return; // no mapping — stay quiet
 
     list    recs = llParseString2List(pool, [";"], []);
-    string  rec  = llList2String(recs, (integer)llFrand(llGetListLength(recs))); // random pick
-    list    f    = llParseString2List(rec, [","], []);
+    integer n    = llGetListLength(recs);
+    integer pick;
+    if (idx < 0) pick = (integer)llFrand(n);        // random
+    else         pick = ((idx % n) + n) % n;        // wrap (safe for negatives too)
+
+    list    f    = llParseString2List(llList2String(recs, pick), [","], []);
     key     u    = (key)llList2String(f, 0);
     float   vol  = (float)llList2String(f, 1);
     integer mode = (integer)llList2String(f, 2);
@@ -115,6 +119,56 @@ playKey(string k, float volOverride) {
     if (mode == MODE_PLAY)      llPlaySound(u, vol);
     else if (mode == MODE_LOOP) llLoopSound(u, vol);
     else                        llTriggerSound(u, vol);
+}
+
+// -- dispatch one command string (shared by link_message + audition) -----
+//   "<key>"              random sound from that event pool
+//   "<key>|<vol>"        ...with a 0.0-1.0 volume override
+//   "@idx|<pool>|<i>"    the i-th sound of an ordered pool (a scale), wrapped
+//   "@idx|<pool>|<i>|<v>"...with volume override
+//   "@chord|<pool>|<i,j,k>[|<v>]"  several indices at once (e.g. a chord)
+//   "@stop"              stop the attached/looping sound on this prim
+//   "@reload"            re-parse the notecard
+doCommand(string str) {
+    list   f = llParseStringKeepNulls(str, ["|"], []);
+    string k = llStringTrim(llList2String(f, 0), STRING_TRIM);
+
+    if (k == "@stop")   { llStopSound();  return; }
+    if (k == "@reload") { loadNotecard(); return; }
+
+    if (k == "@idx") {
+        string pool = llStringTrim(llList2String(f, 1), STRING_TRIM);
+        integer i   = (integer)llList2String(f, 2);
+        float   v   = -1.0;
+        if (llGetListLength(f) > 3) {
+            string vs = llStringTrim(llList2String(f, 3), STRING_TRIM);
+            if (vs != "") v = (float)vs;
+        }
+        playRecord(pool, i, v);
+        return;
+    }
+
+    if (k == "@chord") {
+        string pool = llStringTrim(llList2String(f, 1), STRING_TRIM);
+        list   idxs = llParseString2List(llList2String(f, 2), [","], []);
+        float  v    = -1.0;
+        if (llGetListLength(f) > 3) {
+            string vs = llStringTrim(llList2String(f, 3), STRING_TRIM);
+            if (vs != "") v = (float)vs;
+        }
+        integer i;
+        integer c = llGetListLength(idxs);
+        for (i = 0; i < c; ++i) playRecord(pool, (integer)llList2String(idxs, i), v);
+        return;
+    }
+
+    // Plain event key: random pick from the pool.
+    float v = -1.0;
+    if (llGetListLength(f) > 1) {
+        string vs = llStringTrim(llList2String(f, 1), STRING_TRIM);
+        if (vs != "") v = (float)vs;
+    }
+    playRecord(k, -1, v);
 }
 
 default {
@@ -163,19 +217,12 @@ default {
     // Controllers speak to the bank here.
     link_message(integer sender, integer num, string str, key id) {
         if (num != LM_SOUND) return;
-        list   f = llParseStringKeepNulls(str, ["|"], []);
-        string k = llList2String(f, 0);
-        float  v = -1.0;
-        if (llGetListLength(f) > 1) {
-            string vs = llStringTrim(llList2String(f, 1), STRING_TRIM);
-            if (vs != "") v = (float)vs;
-        }
-        playKey(k, v);
+        doCommand(str);
     }
 
-    // Owner audition: "/42 birth"  (or "/42 @stop").
+    // Owner audition: "/42 birth", "/42 @idx|scale|3", "/42 @stop".
     listen(integer chan, string name, key id, string msg) {
-        playKey(llStringTrim(msg, STRING_TRIM), -1.0);
+        doCommand(llStringTrim(msg, STRING_TRIM));
     }
 
     // Re-parse whenever the notecard is edited/replaced.

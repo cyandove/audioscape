@@ -52,3 +52,34 @@ step           | 00000000-0000-0000-0000-000000000000 | 0.5 | trigger
 # Optional: sounds tied to aggregate board state rather than events.
 # stable       | 00000000-0000-0000-0000-000000000000 | 0.4 | trigger
 # extinct      | 00000000-0000-0000-0000-000000000000 | 0.6 | trigger
+
+# ============================================================
+#  SCALES  —  ordered pools for melodic sonification (indexed, not random)
+# ------------------------------------------------------------
+#  Play a specific note with the @idx command (index wraps around the pool):
+#      llMessageLinked(LINK_THIS, 5001, "@idx|penta|" + (string)col, NULL_KEY);
+#  Play a chord with @chord (comma-separated indices):
+#      llMessageLinked(LINK_THIS, 5001, "@chord|scale|0,2,4,7", NULL_KEY);
+#  ORDER MATTERS here — the bank keeps these in the order written below.
+#
+#  DX7-style FM bells, C major, C4 -> C5  (thanks to the friend who made them).
+# ============================================================
+
+# Full C-major scale (indices 0..7 = C4 D4 E4 F4 G4 A4 B4 C5).
+scale | 03e75367-9c46-ca32-50a0-b5f8d19f27d2 | 0.6 | trigger
+scale | 97e395d5-5d62-8a3b-422e-a6f0a8fccc39 | 0.6 | trigger
+scale | 32f0808f-6d84-32a7-4f38-88c95791d903 | 0.6 | trigger
+scale | ecdbd422-dd31-e5a9-9d0a-a2209599c619 | 0.6 | trigger
+scale | 4857f0c9-94f3-7016-2536-af3c45ecd791 | 0.6 | trigger
+scale | 7683a91f-f825-729e-5717-64f42fa29e9b | 0.6 | trigger
+scale | 992a75da-8ea3-8c06-cb34-5ccafaf9e4fb | 0.6 | trigger
+scale | f80f2416-e2ce-d2f1-e1d0-b7cb2a0eeacb | 0.6 | trigger
+
+# Major pentatonic (indices 0..5 = C4 D4 E4 G4 A4 C5). No dissonant
+# combinations — like wind chimes. Best default for mapping cells/columns.
+penta | 03e75367-9c46-ca32-50a0-b5f8d19f27d2 | 0.6 | trigger
+penta | 97e395d5-5d62-8a3b-422e-a6f0a8fccc39 | 0.6 | trigger
+penta | 32f0808f-6d84-32a7-4f38-88c95791d903 | 0.6 | trigger
+penta | 4857f0c9-94f3-7016-2536-af3c45ecd791 | 0.6 | trigger
+penta | 7683a91f-f825-729e-5717-64f42fa29e9b | 0.6 | trigger
+penta | f80f2416-e2ce-d2f1-e1d0-b7cb2a0eeacb | 0.6 | trigger
