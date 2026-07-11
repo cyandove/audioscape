@@ -140,7 +140,11 @@ default {
             list   f = llParseString2List(line, ["|"], []);
             string k = llStringTrim(llList2String(f, 0), STRING_TRIM);
             key    u = (key)llStringTrim(llList2String(f, 1), STRING_TRIM);
-            if (k != "" && u) {          // 'if (u)' is FALSE for NULL_KEY / malformed
+            // Nest the checks: a key can't be an operand of && (integers only);
+            // a key alone in an if() is TRUE only for a valid, non-null UUID.
+            if (k == "") {
+                llOwnerSay("[sound] skipped (no key): " + line);
+            } else if (u) {                 // key alone = TRUE only for a valid, non-null UUID
                 float   vol  = 1.0;
                 integer mode = MODE_TRIGGER;
                 if (llGetListLength(f) > 2) {
@@ -150,7 +154,7 @@ default {
                 if (llGetListLength(f) > 3) mode = modeCode(llList2String(f, 3));
                 appendSound(k, (string)u + "," + (string)vol + "," + (string)mode);
             } else {
-                llOwnerSay("[sound] skipped malformed line: " + line);
+                llOwnerSay("[sound] skipped (bad uuid): " + line);
             }
         }
         gQuery = llGetNotecardLine(NOTECARD, ++gLine);
