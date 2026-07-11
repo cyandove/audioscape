@@ -1,0 +1,14 @@
+A complete C major scale of DX7-style FM bells, running from C4 to C5:
+
+C4 - 03e75367-9c46-ca32-50a0-b5f8d19f27d2
+D4 - 97e395d5-5d62-8a3b-422e-a6f0a8fccc39
+E4 - 32f0808f-6d84-32a7-4f38-88c95791d903
+F4 - ecdbd422-dd31-e5a9-9d0a-a2209599c619
+G4 - 4857f0c9-94f3-7016-2536-af3c45ecd791
+A4 - 7683a91f-f825-729e-5717-64f42fa29e9b
+B4 - 992a75da-8ea3-8c06-cb34-5ccafaf9e4fb
+C5 - f80f2416-e2ce-d2f1-e1d0-b7cb2a0eeacb
+
+A thought for using them - the C, D, E, G and A are five (or six really, including the high C) good ones to work together. A major pentatonic scale like wind chimes often use :)
+
+Or you've got C E G C to make a major chord!
